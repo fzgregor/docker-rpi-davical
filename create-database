@@ -1,0 +1,19 @@
+#!/bin/sh
+ 
+set -e
+
+apk add --no-cache postgresql-client postgresql perl perl-dbi perl-dbd-pg
+# perl-yaml is not part of alpine v3.4 but it is in edge
+apk add --no-cache -X http://nl.alpinelinux.org/alpine/edge/testing/ perl-yaml
+
+# used by create-database.sh to create the new database and users
+export PSQLOPTS="-h ${DB_HOST} -p ${DB_PORT} -U ${DB_SUPER_USER}"
+export PGPASSWORD="${DB_SUPER_PASS}"
+# the credentials of the davical database users, used in create_database.sh
+export AWL_DBAUSER="${DB_DBA_USER}"
+export AWL_DBAPASS="${DB_DBA_PASS}"
+export AWL_APPUSER="${DB_APP_USER}"
+export AWL_APPPASS="${DB_APP_PASS}"
+# options given to update-davical-database
+export DBAOPTS="--dbhost=${DB_HOST} --dbport=${DB_PORT}"
+/var/www/localhost/dba/create-database.sh "${DB_NAME}"

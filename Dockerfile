@@ -21,24 +21,36 @@ RUN mkdir /run/lighttpd && \
 
 # download davical and awl (a dependency of davical)
 RUN wget "https://gitlab.com/davical-project/awl/repository/archive.tar.gz?ref=r0.56" -O awl.tar.gz && \
-    mkdir /awl && \
-    tar -xf awl.tar.gz --strip 1 -C /awl && \
+    mkdir -p /usr/share/awl && \
+    tar -xf awl.tar.gz --strip 1 -C /usr/share/awl && \
     rm awl.tar.gz && \
     # put the awl library int php's include path
-    sed -e "s/;include_path = \".:\/php\/includes\"/include_path = \".:\/awl\/inc\"/" < /etc/php5/php.ini > /etc/php5/php.ini && \
-    chown lighttpd:lighttpd -R /awl && \
+    sed -e "s/;include_path = \".:\/php\/includes\"/include_path = \".:\/usr\/share\/awl\/inc\"/" < /etc/php5/php.ini > /etc/php5/php.ini && \
+    # is this needed?: chown lighttpd:lighttpd -R /awl && \
     wget "https://gitlab.com/davical-project/davical/repository/archive.tar.gz?ref=r1.1.4" -O davical.tar.gz && \
     rm -r /var/www/localhost/* && \
     tar -xf davical.tar.gz --strip 1 -C /var/www/localhost/ && \
     rm davical.tar.gz
 
+# replace create-database.sh with our modified version
+COPY create-database.sh /var/www/localhost/dba/create-database.sh
+
+# place create-database entry script
+COPY create-database /create-database
+
 # these variables are used by the entrypoint to generate the davical configuration
 ENV DB_HOST db
 ENV DB_PORT 5432
 ENV DB_NAME davical
-ENV DB_USER davical_app
-ENV DB_PASS 53cret
 ENV DEFAULT_LOCALE en_EN.UTF-8
+ENV DB_APP_USER davical_app
+ENV DB_APP_PASS 53cret
+
+# used by the create database and update database scripts
+ENV DB_SUPER_USER dbadmin
+ENV DB_SUPER_PASS 53cret
+ENV DB_DBA_USER davical_dba
+ENV DB_DBA_PASS 53cret
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh 
 

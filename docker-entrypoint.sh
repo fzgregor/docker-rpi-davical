@@ -10,7 +10,7 @@ mkdir -p /etc/davical
 cat << EOF > /etc/davical/config.php
 <?php
     \$c->default_locale = "${DEFAULT_LOCALE}";
-    \$c->pg_connect[] = "host=${DB_HOST} port=${DB_PORT} dbname=${DB_NAME} user=${DB_USER} password=${DB_PASS}";
+    \$c->pg_connect[] = "host=${DB_HOST} port=${DB_PORT} dbname=${DB_NAME} user=${DB_APP_USER} password=${DB_APP_PASS}";
 ?>
 EOF
 
